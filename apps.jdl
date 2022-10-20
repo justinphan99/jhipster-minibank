@@ -1,0 +1,142 @@
+application {
+  config {
+    baseName gateway,
+    packageName com.okta.developer.gateway,
+    applicationType gateway,
+    authenticationType oauth2,
+    prodDatabaseType postgresql,
+    serviceDiscoveryType eureka,
+    testFrameworks [cypress]
+  }
+  entities Customer, CardCustomer, Card
+}
+
+application {
+  config {
+    baseName customer,
+    packageName com.okta.developer.store,
+    applicationType microservice,
+    authenticationType oauth2,
+    databaseType sql,
+    devDatabaseType postgresql,
+    prodDatabaseType postgresql,
+    enableHibernateCache false,
+    serverPort 8082,
+    serviceDiscoveryType eureka
+    messageBroker kafka
+  }
+  entities Customer
+}
+
+application {
+  config {
+    baseName card,
+    packageName com.okta.developer.card,
+    applicationType microservice,
+    authenticationType oauth2,
+    databaseType sql,
+    devDatabaseType postgresql,
+    prodDatabaseType postgresql,
+    enableHibernateCache false,
+    serverPort 8082,
+    serviceDiscoveryType eureka
+    messageBroker kafka
+  }
+  entities CardCustomer, Card
+}
+
+enum CustomerTitle {
+    CUSTOMER_TITLE_UNKNOWN,
+    CUSTOMER_TITLE_MISS,
+    CUSTOMER_TITLE_MR,
+    CUSTOMER_TITLE_MRS,
+    CUSTOMER_TITLE_MS
+}
+
+enum CustomerGender {
+    CUSTOMER_GENDER_UNKNOWN,
+    CUSTOMER_GENDER_FEMALE,
+    CUSTOMER_GENDER_MALE
+}
+
+enum CustomerContactMethod {
+    CUSTOMER_CONTACT_METHOD_UNKNOWN,
+    CUSTOMER_CONTACT_METHOD_NONE,
+    CUSTOMER_CONTACT_METHOD_EMAIL,
+    CUSTOMER_CONTACT_METHOD_SMS,
+    CUSTOMER_CONTACT_METHOD_NOTIFICATION
+}
+
+enum CustomerAccessibility {
+    CUSTOMER_ACCESSIBILITY_UNKNOWN,
+    CUSTOMER_ACCESSIBILITY_AUDIO,
+    CUSTOMER_ACCESSIBILITY_LARGE_PRINT,
+    CUSTOMER_ACCESSIBILITY_BRAILLE,
+    CUSTOMER_ACCESSIBILITY_DEAF
+}
+
+enum CardProduct {
+    CASA,
+    CREDIT_CARD,
+    LOAN
+}
+
+enum CardStatus {
+    ACCOUNT_STATUS_UNKNOWN,
+    ACCOUNT_STATUS_CLOSED,
+    ACCOUNT_STATUS_CANCELLED,
+    ACCOUNT_STATUS_PENDING_CLOSURE,
+    ACCOUNT_STATUS_PENDING
+}
+
+entity Customer {
+  title CustomerTitle,
+  firstName String required,
+  middleName String,
+  lastName String required,
+  dob LocalDate required,
+  gender CustomerGender,
+  nationality String required,
+  emailAddress String required,
+  mobilePhoneNumber String required,
+  homePhoneNumber String,
+  businessPhoneNumber String,
+  contactMethod CustomerContactMethod,
+  countryOfResidence String,
+  countryOfTaxation String,
+  accessibility CustomerAccessibility
+}
+
+entity CardCustomer {
+  title CustomerTitle,
+  firstName String,
+  middleName String,
+  lastName String,
+  dob LocalDate,
+  gender CustomerGender,
+  nationality String,
+  emailAddress String,
+  mobilePhoneNumber String,
+  homePhoneNumber String,
+  businessPhoneNumber String,
+  contactMethod CustomerContactMethod,
+  countryOfResidence String,
+  countryOfTaxation String,
+  accessibility CustomerAccessibility
+}
+
+entity Card {
+  product CardProduct required,
+  denomination String,
+  status CardStatus,
+  additionalInformation String
+}
+
+relationship OneToMany {
+    CardCustomer to Card{customer}
+}
+
+service * with serviceImpl
+
+microservice Customer with customer
+microservice CardCustomer, Card with card
